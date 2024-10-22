@@ -79,7 +79,7 @@ extern void __loop() {
 static struct _reent *_impure_ptr1 = nullptr;
 
 extern "C" int main() {
-#if F_CPU != 125000000
+#if (defined(PICO_RP2040) && (F_CPU != 125000000)) || (defined(PICO_RP2350) && (F_CPU != 150000000))
     set_sys_clock_khz(F_CPU / 1000, true);
 #endif
 
@@ -88,7 +88,7 @@ extern "C" int main() {
 
     // Allocate impure_ptr (newlib temps) if there is a 2nd core running
     if (!__isFreeRTOS && (setup1 || loop1)) {
-        _impure_ptr1 = (struct _reent*)calloc(sizeof(struct _reent), 1);
+        _impure_ptr1 = (struct _reent*)calloc(1, sizeof(struct _reent));
         _REENT_INIT_PTR(_impure_ptr1);
     }
 
@@ -134,7 +134,6 @@ extern "C" int main() {
         }
         rp2040.fifo.registerCore();
     }
-
     if (!__isFreeRTOS) {
         if (setup1 || loop1) {
             delay(1); // Needed to make Picoprobe upload start 2nd core

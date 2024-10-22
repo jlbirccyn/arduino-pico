@@ -156,6 +156,22 @@ platform <https://github.com/maxgerhardt/platform-raspberrypi/blob/77e0d3a29d1db
     ; Flash Size: 2MB (Sketch: 0.5MB, FS:1.5MB)
     board_build.filesystem_size = 1.5m
 
+PSRAM size
+----------
+
+For RP2350 based boards, this controls how much PSRAM the firmware will think it has available in bytes, mapped at starting address 0x11000000.
+
+To learn more about PSRAM usage, see: :doc:`RP2350 PSRAM Support <psram>` 
+
+.. code:: ini
+
+    ; PSRAM size: 1MB
+    board_upload.psram_length = 1048576
+    ; PSRAM size: 2MB
+    board_upload.psram_length = 2097152
+    ; PSRAM size: 4MB
+    board_upload.psram_length = 4194304
+
 CPU Speed
 ---------
 
@@ -262,6 +278,18 @@ default Pico SDK USB stack. To change it, add
 Note that the special "No USB" setting is also supported, through the
 shortcut-define ``PIO_FRAMEWORK_ARDUINO_NO_USB``.
 
+USB Customization
+-----------------
+
+If you want to change the USB VID, PID, product or manufacturer name that the device will appear under, configure them as follows:
+
+.. code:: ini
+
+    board_build.arduino.earlephilhower.usb_manufacturer = Custom Manufacturer
+    board_build.arduino.earlephilhower.usb_product = Ultra Cool Product
+    board_build.arduino.earlephilhower.usb_vid = 0xABCD
+    board_build.arduino.earlephilhower.usb_pid = 0x1337
+
 IP Stack
 --------
 
@@ -309,6 +337,19 @@ local copy of the core (with e.g. some modifications) on disk (`see documentatio
 Note that this can only be done for versions that have the PlatformIO
 builder script it in, so versions before 1.9.2 are not supported.
 
+Selecting the CPU architecture
+------------------------------
+
+By default Platform.IO will build for the onboard ARM cores on the RP2350.  To build RISC-V binaries
+adjust the ``board_build.mcu`` option accordingly:
+
+.. code:: ini
+
+    ; RP2350 based (RISC-V)
+    [env:rpipico2-riscv]
+    board = rpipico2
+    board_build.mcu = rp2350-riscv
+
 Examples
 --------
 
@@ -342,7 +383,6 @@ To specify the debugging adapter, use ``debug_tool`` (`documentation <https://do
 * ``jlink``
 * ``raspberrypi-swd``
 * ``blackmagic``
-* ``pico-debug``
 
 These values can also be used in ``upload_protocol`` if you want PlatformIO to upload the regular firmware through this method, which you likely want.
 
@@ -361,25 +401,6 @@ For further information on customizing debug options, like the initial breakpoin
     For the BlackMagicProbe debugging probe (as can be e.g., created by simply flashing a STM32F103C8 "Bluepill" board), you currently have to use the branch ``fix/rp2040-flash-reliability`` (or at least commit ``1d001bc``) **and** use the `official ARM provided toolchain <https://github.com/blackmagic-debug/blackmagic/issues/1364#issuecomment-1503393266>`_.
 
     You can obtain precompiled binaries from `here <https://github.com/blackmagic-debug/blackmagic/issues/1364#issuecomment-1503372723>`__. A flashing guide is available `here <https://primalcortex.wordpress.com/2017/06/13/building-a-black-magic-debug-probe/>`__. You then have to configure the target serial port ("GDB port") in your project per `documentation <https://docs.platformio.org/en/latest/plus/debug-tools/blackmagic.html#debugging-tool-blackmagic>`__.
-
-.. note::
-    For the pico-debug (`download <https://github.com/majbthrd/pico-debug/releases>`__) debugging way, *which needs no additional debug probe*, add this snippet to your ``platformio.ini`` and follow the given procedure:
-
-    .. code:: ini
-
-        upload_protocol = pico-debug
-        debug_tool = pico-debug
-        build_flags = -DPIO_FRAMEWORK_ARDUINO_NO_USB
-
-    1. Build your firmware normally
-    2. Plug in the Pico in BOOTSEL mode
-    3. Drag and drop your ``.pio/build/<env>/firmware.uf2`` onto the boot drive
-    4. Unplug and replug your Pico back into BOOTSEL mode for the second time
-    5. Drag and drop the downloaded ``pico-debug-gimmecache.uf2`` file onto the boot drive
-    6. A CMSIS-DAP device should now appear on your computer
-    7. Start debugging via the debug sidebar as normal
-
-    Note the restrictions: The second core cannot be used, the USB port cannot be used (no USB serial, only UART serial), 16KB less RAM is available.
 
 Filesystem Uploading
 --------------------

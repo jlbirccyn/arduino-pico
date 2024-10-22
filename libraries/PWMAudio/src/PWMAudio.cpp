@@ -119,7 +119,7 @@ bool PWMAudio::begin() {
 
     if (_stereo && (_pin & 1)) {
         // Illegal, need to have consecutive pins on the same PWM slice
-        Serial.printf("ERROR: PWMAudio stereo mode requires pin be even\n");
+        DEBUGV("ERROR: PWMAudio stereo mode requires pin be even\n");
         return false;
     }
 
@@ -127,7 +127,7 @@ bool PWMAudio::begin() {
     _wasHolding = false;
 
     if (!_bufferWords) {
-        _bufferWords = 16;
+        _bufferWords = 64;
     }
 
     setPWMFrequency(_freq);
